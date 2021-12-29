@@ -1,0 +1,189 @@
+Sub VBA_Challenge()
+
+For Each ws In Worksheets
+
+'set initial variable for the ticker name (string like the credit charge activity)
+    Dim Ticker As String
+    
+'set initial variable for the yearly change (double because it has a ".")(YearlyChange=YC)
+    Dim YC As Variant
+
+'set initial variable for the percent change (double because it will also have a ".") (PercentChange=PC)
+    Dim PC As Variant
+    
+ 'set intial variable for Opening Value (OpeningValue=OV)
+ Dim OV As Variant
+ OV = ws.Cells(2, 3).Value
+ 
+ 'set initial variable for Final Value (FinalValue=FV)
+ Dim FV As Variant
+
+'set initial variable for the TotalStockVolume (Totalvolume = TV)
+    Dim TV As Double
+    TV = 0
+    
+'Track the loaction of each ticker symbol and all accompanying data (ticker table row =ttr)
+    Dim TTR As Integer
+    TTR = 2
+    
+'Set initial variable for Bonus work
+Dim MaxTicker As String
+Dim MaxVolume As Double
+Dim MaxPercent As Variant
+Dim MaxNegPercent As Variant
+
+'set inital variable for last row (Last Row = LR)
+    LR = ws.Cells(Rows.Count, 1).End(xlUp).Row
+
+
+'set colum names
+ws.Cells(1, 9).Value = "Ticker"
+
+ws.Cells(1, 10).Value = "Yearly Change"
+
+ws.Cells(1, 11).Value = "Percent Change"
+
+ws.Cells(1, 12).Value = "Total Stock Volume"
+
+ws.Cells(1, 16).Value = "Ticker"
+
+ws.Cells(1, 17).Value = "Value"
+
+ws.Cells(2, 15).Value = "Greatest % Increase"
+
+ws.Cells(3, 15).Value = "Greatest % Decrease"
+
+ws.Cells(4, 15).Value = "Greatest Total Volume"
+
+
+
+'create loop
+For i = 2 To LR
+    
+    'determine if ticker symblow is the same
+    If ws.Cells(i + 1, 1).Value <> ws.Cells(i, 1).Value Then
+    
+    'define ticker
+    Ticker = ws.Cells(i, 1).Value
+    
+    FV = ws.Cells(i, 6).Value
+    
+    'add total volume
+    TV = TV + ws.Cells(i, 7).Value
+    
+    YC = FV - OV
+
+        If OV = 0 Then
+        PC = 0
+        Else
+        PC = (YC / OV)
+        End If
+    
+    'move ticker symbol to table
+    ws.Range("I" & TTR).Value = Ticker
+    
+    'move total volume to table
+    ws.Range("L" & TTR).Value = TV
+    
+    'move yearly change to table
+    ws.Range("J" & TTR).Value = YC
+    
+    'move percent change to table
+    ws.Range("K" & TTR).Value = PC
+    
+    'Format PC to a %
+    ws.Range("K" & TTR).NumberFormat = "0.00%"
+    
+    'format the columns to size
+    ws.Columns("I:L").AutoFit
+    
+    
+        If YC > 0 Then
+        ws.Range("J" & TTR).Interior.ColorIndex = 4
+        Else
+        ws.Range("J" & TTR).Interior.ColorIndex = 3
+        End If
+    
+    'add one to table for next ticker symbol
+    TTR = TTR + 1
+    
+    'reset total volume for next ticker symbol
+    TV = 0
+    
+    'Move start value
+    OV = ws.Cells(i + 1, 3).Value
+    
+'if ticker symbol is the same innext row
+Else
+    
+    'add to total volume
+    TV = TV + ws.Cells(i, 7).Value
+    
+    End If
+    
+    Next i
+    
+    
+    'start of Bonus work
+    MaxVolume = ws.Cells(2, 12).Value
+    MaxTicker = ws.Cells(2, 9).Value
+    
+    'loop for max volume
+    For J = 3 To LR
+        If MaxVolume < ws.Cells(J, 12).Value Then
+        MaxVolume = ws.Cells(J, 12).Value
+        MaxTicker = ws.Cells(J, 9).Value
+        
+        End If
+        
+    Next J
+    
+     'move results to Bonus Table
+    ws.Range("P4").Value = MaxTicker
+    ws.Range("Q4").Value = MaxVolume
+    
+    'reset variables
+    
+    MaxPercent = ws.Cells(2, 11).Value
+    MaxTicker = ws.Cells(2, 9).Value
+    
+    'loop for greatest percentage change
+    For k = 3 To LR
+    If MaxPercent < ws.Cells(k, 11).Value Then
+        MaxPercent = ws.Cells(k, 11).Value
+        MaxTicker = ws.Cells(k, 9).Value
+        
+        End If
+        
+    Next k
+    
+    'move results to Bonus Table
+    ws.Range("P2").Value = MaxTicker
+    ws.Range("Q2").Value = MaxPercent
+    ws.Range("Q2").NumberFormat = "0.00%"
+    
+    'reset variables
+    MaxNegPercent = ws.Cells(2, 11).Value
+    MaxTicker = ws.Cells(2, 9).Value
+    
+    'start loop for greatest % decrease
+    For l = 3 To LR
+        If MaxNegPercent > ws.Cells(l, 11).Value Then
+        MaxNegPercent = ws.Cells(l, 11).Value
+        MaxTicker = ws.Cells(l, 9).Value
+        
+        End If
+        
+    Next l
+    
+    'move results to Bonus table
+    ws.Range("P3").Value = MaxTicker
+    ws.Range("Q3").Value = MaxNegPercent
+    ws.Range("Q3").NumberFormat = "0.00%"
+    ws.Columns("O:Q").AutoFit
+    
+    
+    Next ws
+    
+    
+End Sub
